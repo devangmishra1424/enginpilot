@@ -2,8 +2,28 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 from agents import orchestrator, reliability_agent
+from agents.tools import cypher_query
 
 _NO_SOURCE_ASSET_AGENT_RESULT = {"answer": "asset not found", "source": None}
+
+
+def test_get_downstream_assets_known_asset_returns_directional_dependencies():
+    """UPS-01 has POWERS -> RACK-A12 (real downstream) and FED_BY -> PDU-03
+    (reverse direction — PDU-03 is upstream of UPS-01, not downstream of it).
+    Only the forward directional edge should come back."""
+    result = cypher_query.get_downstream_assets("UPS-01")
+    assert result == [{"asset_id": "RACK-A12", "relationship": "POWERS"}]
+
+
+def test_get_downstream_assets_unknown_asset_returns_empty_list():
+    assert cypher_query.get_downstream_assets("FOO-99") == []
+
+
+def test_get_downstream_assets_asset_with_no_downstream_edges_returns_empty_list():
+    # PUMP-07's only relationship is SERVES -> CHILLER-03, which is a reverse
+    # edge (CHILLER-03 depends on PUMP-07, not the other way around) — not a
+    # directional dependency type, so no downstream assets.
+    assert cypher_query.get_downstream_assets("PUMP-07") == []
 
 
 def test_no_asset_id_returns_insufficient_answer_without_calling_llm():
@@ -306,6 +326,84 @@ def test_portfolio_question_with_no_asset_id_ranks_assets_by_risk():
     # Prompt itself must present assets in ranked order (High -> Medium -> no fire).
     prompt_sent = mock_generate.call_args[0][0]
     assert prompt_sent.index("HIGH-01") < prompt_sent.index("MED-01") < prompt_sent.index("LOW-01")
+
+
+def test_portfolio_flagged_asset_gets_downstream_lookup_non_flagged_does_not():
+    """Section 12.3 Step 3 / Section 4.3: only flagged (High/Alert) assets
+    trigger a downstream-dependency lookup — not every asset in the
+    portfolio. A Medium-risk and a no-fire asset must never even call
+    get_downstream_assets (scope discipline), while the High-risk asset's
+    result must carry real downstream data through to both the prompt and
+    the source."""
+    fake_assets = [
+        {"asset_id": "HIGH-01", "class": "UPS"},
+        {"asset_id": "MED-01", "class": "UPS"},
+        {"asset_id": "LOW-01", "class": "UPS"},
+    ]
+    fresh_readings = {
+        "HIGH-01": {
+            "readings": {"internal_temp_c": 45.0},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "asset_properties": {},
+        },
+        "MED-01": {
+            "readings": {"internal_temp_c": 37.0},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "asset_properties": {},
+        },
+        "LOW-01": {
+            "readings": {"internal_temp_c": 20.0},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "asset_properties": {},
+        },
+    }
+    downstream_result = [{"asset_id": "RACK-A12", "relationship": "POWERS"}]
+
+    with (
+        patch("agents.reliability_agent.cypher_query.list_all_assets", return_value=fake_assets),
+        patch("agents.reliability_agent.sensor_data.get_current_reading", side_effect=lambda aid: fresh_readings[aid]),
+        patch(
+            "agents.reliability_agent.cypher_query.get_downstream_assets", return_value=downstream_result
+        ) as mock_downstream,
+        patch("agents.reliability_agent.router.generate", return_value="placeholder") as mock_generate,
+    ):
+        result = reliability_agent.run("Show me the critical assets with the highest risk right now.")
+
+    # Only the flagged (High) asset triggers the lookup — called exactly
+    # once, for HIGH-01, never for MED-01 or LOW-01.
+    mock_downstream.assert_called_once_with("HIGH-01")
+
+    source_by_id = {entry["asset_id"]: entry for entry in result["source"]}
+    assert source_by_id["HIGH-01"]["downstream"] == downstream_result
+    assert "downstream" not in source_by_id["MED-01"]
+    assert "downstream" not in source_by_id["LOW-01"]
+
+    prompt_sent = mock_generate.call_args[0][0]
+    assert "Downstream impact: powers RACK-A12." in prompt_sent
+
+
+def test_portfolio_flagged_asset_with_no_downstream_edges_states_that_explicitly():
+    """A flagged asset with zero downstream relationships is still a real
+    finding — the prompt must say so explicitly, not just omit the line."""
+    fake_assets = [{"asset_id": "HIGH-01", "class": "UPS"}]
+    fresh_readings = {
+        "HIGH-01": {
+            "readings": {"internal_temp_c": 45.0},
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "asset_properties": {},
+        }
+    }
+
+    with (
+        patch("agents.reliability_agent.cypher_query.list_all_assets", return_value=fake_assets),
+        patch("agents.reliability_agent.sensor_data.get_current_reading", side_effect=lambda aid: fresh_readings[aid]),
+        patch("agents.reliability_agent.cypher_query.get_downstream_assets", return_value=[]),
+        patch("agents.reliability_agent.router.generate", return_value="placeholder") as mock_generate,
+    ):
+        reliability_agent.run("Show me the critical assets with the highest risk right now.")
+
+    prompt_sent = mock_generate.call_args[0][0]
+    assert "Downstream impact: no downstream dependencies recorded." in prompt_sent
 
 
 def test_portfolio_question_excludes_stale_asset_without_failing_whole_scan():

@@ -396,3 +396,42 @@ def test_gibberish_routing_response_is_unroutable_not_silently_asset():
     assert result["route"] == "unroutable"
     assert result["final_answer"] == "I don't have enough information."
     assert result["enough_info"] is False
+
+
+def test_none_routing_response_is_unroutable():
+    """The routing prompt now explicitly teaches the model to respond "none"
+    for nonsensical/unparseable questions (Playbook Section 5.0 Escalation
+    Rule) instead of being forced to always pick one of the 4 real routes.
+    "none" must never substring-match a real route and must land on
+    "unroutable", same as any other unparseable response."""
+    fake = _fake_generate(routing_response="none", forbid_articulation=True)
+    with patch("agents.orchestrator.router.generate", side_effect=fake):
+        result = orchestrator.graph.invoke(_blank_state("asdkfj random nonsense question xyz"))
+
+    assert result["route"] == "unroutable"
+    assert result["final_answer"] == "I don't have enough information."
+    assert result["enough_info"] is False
+
+
+def test_live_gibberish_question_routes_to_unroutable_not_a_real_agent():
+    """Regression test for a real live-testing bug: the routing LLM was
+    confidently picking a real route (e.g. "asset") on pure gibberish input,
+    rather than admitting it couldn't classify the question — verified via a
+    standalone diagnostic script that printed the RAW, unmocked
+    router.generate(role="routing") response for this exact question and got
+    back the bare word "asset", with no hedging at all.
+
+    A mocked test cannot catch this failure mode — it was the real model's
+    actual behavior, not a parsing bug in _parse_route() (which already
+    correctly fell through to "unroutable" for any non-matching response).
+    This test intentionally makes a real, non-mocked NVIDIA API call for
+    exactly that reason. If this becomes too costly/flaky for routine CI, it
+    should be marked with a `slow`/`live` marker and excluded from the
+    default run rather than deleted, since it's the only test that actually
+    exercises the fixed prompt against the real model.
+    """
+    result = orchestrator.graph.invoke(_blank_state("asdkfj random nonsense question xyz"))
+
+    assert result["route"] == "unroutable"
+    assert result["final_answer"] == "I don't have enough information."
+    assert result["enough_info"] is False

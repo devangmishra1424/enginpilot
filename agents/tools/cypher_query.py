@@ -56,3 +56,31 @@ def list_all_assets() -> list[dict]:
     without needing to know an ID up front.
     """
     return [{"asset_id": a["asset_id"], "class": a["class"]} for a in _FAKE_ASSETS.values()]
+
+
+# Directional dependency-type edges only — these mean "target depends on
+# source" (source's failure affects target), which is the actual downstream
+# direction Section 4.3 cares about ("which racks lose cooling if CRAH-02
+# fails"). FED_BY, SERVES, etc. are the reverse direction (source depends on
+# target) and must NOT be treated as downstream — including them would claim
+# an asset impacts something it's actually fed/served BY.
+_DOWNSTREAM_RELATIONSHIP_TYPES = {"POWERS", "COOLS", "FEEDS"}
+
+
+def get_downstream_assets(asset_id: str) -> list[dict]:
+    """Returns the assets that DEPEND ON (are downstream of / would be
+    affected by the failure of) the given asset_id — e.g. for a UPS, what it
+    POWERS; for a Chiller/CRAH, what it COOLS. Walks the mock asset's
+    "relationships" list for directional dependency-type edges (POWERS,
+    COOLS, FEEDS) and returns [{"asset_id": str, "relationship": str}, ...].
+    Returns [] if the asset has no such relationships or doesn't exist —
+    never fabricate a dependency.
+    """
+    asset = _FAKE_ASSETS.get(asset_id)
+    if asset is None:
+        return []
+    return [
+        {"asset_id": rel["target"], "relationship": rel["type"]}
+        for rel in asset["relationships"]
+        if rel["type"] in _DOWNSTREAM_RELATIONSHIP_TYPES
+    ]

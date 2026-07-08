@@ -13,7 +13,7 @@ These are the manufacturer/SOP-documented steps; this is not an instruction to
 execute them autonomously.
 
 Output format:
-1. Source (document name + page) cited first
+1. Source (document name + section) cited first
 2. Explanation: a structured procedure outline — Steps, Parts (if mentioned in
    the excerpts), Duration (if stated in the excerpts)
 3. Recommendation (advisory): note any excerpt gaps found, if applicable

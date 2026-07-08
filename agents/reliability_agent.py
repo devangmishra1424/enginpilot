@@ -17,7 +17,7 @@ from agents.config import RETRIEVAL_CONFIDENCE_FLOOR
 from agents.tools import cypher_query, qdrant_search, rule_engine, sensor_data
 from llm import router
 from physics.engine import evaluate_portfolio, rank_by_risk
-from physics.schemas import RuleInput
+from physics.schemas import RiskLevel, RuleInput
 
 _PROMPT_PATH = Path(__file__).parent / "prompts" / "reliability.md"
 _PROMPT_TEMPLATE = _PROMPT_PATH.read_text()
@@ -51,6 +51,23 @@ _VALID_RISK_BANDS = {
 _NUMERIC_SCORE_PATTERN = re.compile(
     r"\b\d{1,3}\s*/\s*100\b|\brisk score\b|\bconfidence score\b|\bout of 100\b", re.IGNORECASE
 )
+
+# Section 4.3 "flagged asset" tier for the portfolio's downstream-dependency
+# lookup — not every asset, just the ones actually at risk. HIGH and ALERT
+# are the two bands the current 5-rule kernel can produce that represent a
+# genuine active fault (as opposed to WARNING/INSPECTION_REQUIRED/
+# REDUCED_LIFE, which exist but aren't in play for the curated portfolio
+# demo assets today).
+_FLAGGED_RISK_LEVELS = {RiskLevel.HIGH, RiskLevel.ALERT}
+
+_RELATIONSHIP_VERB = {"POWERS": "powers", "COOLS": "cools", "FEEDS": "feeds"}
+
+
+def _downstream_impact_phrase(downstream: list[dict]) -> str:
+    if not downstream:
+        return "no downstream dependencies recorded"
+    parts = [f"{_RELATIONSHIP_VERB.get(d['relationship'], d['relationship'].lower())} {d['asset_id']}" for d in downstream]
+    return "; ".join(parts)
 
 
 def _rule_summary(fired_rules: list) -> str:
@@ -95,16 +112,24 @@ def _portfolio_rank_summary(ranked: list[dict]) -> str:
             rationale = "; ".join(f"{r.rule_fired}: {r.explanation}" for r in fired_rules)
         else:
             rationale = "No configured rule threshold was crossed."
-        lines.append(f"- {entry['asset_id']} — {band} — {rationale}")
+        line = f"- {entry['asset_id']} — {band} — {rationale}"
+        if "downstream" in entry:
+            # Only flagged (HIGH/ALERT) assets carry this key at all (see
+            # _run_portfolio) — Section 4.3: what would be affected if this
+            # asset fails, not a command to do anything about it.
+            line += f" Downstream impact: {_downstream_impact_phrase(entry['downstream'])}."
+        lines.append(line)
     return "\n".join(lines)
 
 
 def _deterministic_portfolio_answer(ranked: list[dict], excluded_notes: list[str]) -> str:
-    lines = [
-        f"{entry['asset_id']} — "
-        f"{entry['highest_risk_level'].value if entry['highest_risk_level'] is not None else 'Low Risk'}"
-        for entry in ranked
-    ]
+    lines = []
+    for entry in ranked:
+        band = entry["highest_risk_level"].value if entry["highest_risk_level"] is not None else "Low Risk"
+        line = f"{entry['asset_id']} — {band}"
+        if "downstream" in entry:
+            line += f" — Downstream impact: {_downstream_impact_phrase(entry['downstream'])}."
+        lines.append(line)
     answer = "\n".join(lines)
     if excluded_notes:
         answer += "\n\nExcluded: " + "; ".join(excluded_notes)
@@ -150,6 +175,15 @@ def _run_portfolio(question: str) -> dict:
 
     portfolio_results = evaluate_portfolio(rule_inputs)
     ranked = rank_by_risk(portfolio_results)
+
+    # Section 12.3 Step 3 / Section 4.3: query downstream dependency context
+    # for flagged (HIGH/ALERT) assets only — this is what makes the ranking
+    # "credible" rather than a plain database lookup. Non-flagged assets
+    # never trigger this call at all (scope discipline: not every asset,
+    # just the ones actually at risk).
+    for entry in ranked:
+        if entry["highest_risk_level"] in _FLAGGED_RISK_LEVELS:
+            entry["downstream"] = cypher_query.get_downstream_assets(entry["asset_id"])
 
     prompt = _PORTFOLIO_PROMPT_TEMPLATE.format(
         ranked_summary=_portfolio_rank_summary(ranked),
