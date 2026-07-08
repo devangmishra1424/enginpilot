@@ -1,0 +1,12 @@
+{
+  "asset_class": "Chiller",
+  "manufacturer": "Carrier",
+  "model_family": "30XA",
+  "frequency_hz": 50,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "6dd3326677f0",
+  "filename": "03_carrier_30xa_chiller_iom.pdf",
+  "sha256": "6dd3326677f073aed638365af5cc826b162891d8600905ed4713546dc85fd080",
+  "document_status": "active"
+}

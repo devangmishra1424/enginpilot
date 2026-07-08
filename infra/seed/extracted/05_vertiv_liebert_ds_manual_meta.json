@@ -1,0 +1,12 @@
+{
+  "asset_class": "CRAH",
+  "manufacturer": "Vertiv",
+  "model_family": "Liebert DS",
+  "frequency_hz": 60,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "70f95da1c4a5",
+  "filename": "05_vertiv_liebert_ds_manual.pdf",
+  "sha256": "70f95da1c4a5916aa949e23b05ed3c3a01ca805e6952047b01fbb84ca3b87175",
+  "document_status": "active"
+}

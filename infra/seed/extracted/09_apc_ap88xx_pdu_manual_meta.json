@@ -1,0 +1,12 @@
+{
+  "asset_class": "PDU",
+  "manufacturer": "APC",
+  "model_family": "AP88XX",
+  "frequency_hz": null,
+  "provenance": "unofficial_mirror",
+  "doc_type": "oem_manual",
+  "document_id": "a73a4cdee58b",
+  "filename": "09_apc_ap88xx_pdu_manual.pdf",
+  "sha256": "a73a4cdee58b9af8c0142942e88ebaaa35ee656fbb4c142b8f23fe2756e58f9e",
+  "document_status": "active"
+}

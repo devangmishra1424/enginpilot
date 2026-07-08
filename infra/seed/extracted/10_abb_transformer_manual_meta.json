@@ -1,0 +1,12 @@
+{
+  "asset_class": "Transformer",
+  "manufacturer": "ABB",
+  "model_family": "Dry Type",
+  "frequency_hz": null,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "2c97112b9222",
+  "filename": "10_abb_transformer_manual.pdf",
+  "sha256": "2c97112b9222e9608a0ba342350392ca9b6adbe7e3f56ad1773e57dc463e22f8",
+  "document_status": "active"
+}

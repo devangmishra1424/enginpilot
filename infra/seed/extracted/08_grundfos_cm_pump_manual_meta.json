@@ -1,0 +1,12 @@
+{
+  "asset_class": "Pump",
+  "manufacturer": "Grundfos",
+  "model_family": "CM",
+  "frequency_hz": null,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "75926c3b3de3",
+  "filename": "08_grundfos_cm_pump_manual.pdf",
+  "sha256": "75926c3b3de38f07095cce5db94a086f2e566aa257c7dfcc3307febc0ae6bdc8",
+  "document_status": "active"
+}

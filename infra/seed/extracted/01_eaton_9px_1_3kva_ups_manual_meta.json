@@ -1,0 +1,12 @@
+{
+  "asset_class": "UPS",
+  "manufacturer": "Eaton",
+  "model_family": "9PX Standard",
+  "frequency_hz": null,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "8e02e400f94b",
+  "filename": "01_eaton_9px_1_3kva_ups_manual.pdf",
+  "sha256": "8e02e400f94bd2427ff013b3962a3d617d683cb770b9bfcdecce03d8a38114ad",
+  "document_status": "active"
+}

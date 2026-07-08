@@ -1,0 +1,62 @@
+# ==============================================
+# ENGINPILOT MVP - .gitignore
+# ==============================================
+
+# 1. Python-generated files & Virtual Environments
+__pycache__/
+*.py[oc]
+*.pyc
+*.pyo
+build/
+dist/
+wheels/
+*.egg-info/
+.venv/
+.venv-1/
+venv/
+env/
+.Python
+
+# 2. Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# 3. IDE & OS Junk
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 4. Heavy Raw Data & Local Databases
+# Do not commit raw PDFs or local vector DB storage
+*.pdf
+infra/seed/sample_pdfs/
+infra/seed/output/
+infra/db/qdrant/storage/
+infra/db/postgres/data/
+infra/db/neo4j/data/
+
+# 5. Generated Evaluation Reports & Logs
+# Keep the test scripts, ignore the generated outputs
+*_report_*.md
+*_heatmap_*.md
+*.log
+logs/
+
+# 6. Temporary & Backup Files
+* - Copy.*
+*.bak
+*.tmp
+
+# 7. Frontend / Next.js (Node modules & build artifacts)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
