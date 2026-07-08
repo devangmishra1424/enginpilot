@@ -1,0 +1,10 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.DS_Store
+docs/
+nv.py
+nvidia_test.py
