@@ -1,0 +1,67 @@
+[
+  {
+    "file": "sop_battery_bank_inspection.pdf",
+    "status": "success",
+    "chars": 8484
+  },
+  {
+    "file": "sop_chiller_preventive_maintenance.pdf",
+    "status": "success",
+    "chars": 7658
+  },
+  {
+    "file": "06_vertiv_liebert_dm_manual.pdf",
+    "status": "success",
+    "chars": 187340
+  },
+  {
+    "file": "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+    "status": "success",
+    "chars": 180806
+  },
+  {
+    "file": "10_abb_transformer_manual.pdf",
+    "status": "success",
+    "chars": 43426
+  },
+  {
+    "file": "sop_ups_preventive_maintenance.pdf",
+    "status": "success",
+    "chars": 7538
+  },
+  {
+    "file": "09_apc_ap88xx_pdu_manual.pdf",
+    "status": "success",
+    "chars": 339740
+  },
+  {
+    "file": "07_grundfos_cr_crn_pump_manual.pdf",
+    "status": "success",
+    "chars": 92274
+  },
+  {
+    "file": "04_carrier_30xa_smartvu_controls.pdf",
+    "status": "success",
+    "chars": 409696
+  },
+  {
+    "file": "08_grundfos_cm_pump_manual.pdf",
+    "status": "success",
+    "chars": 53534
+  },
+  {
+    "file": "05_vertiv_liebert_ds_manual.pdf",
+    "status": "success",
+    "chars": 477023
+  },
+  {
+    "file": "01_eaton_9px_1_3kva_ups_manual.pdf",
+    "status": "success",
+    "chars": 138736
+  },
+  {
+    "file": "03_carrier_30xa_chiller_iom.pdf",
+    "status": "success",
+    "chars": 487792
+  }
+]

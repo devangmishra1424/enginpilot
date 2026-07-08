@@ -1,0 +1,12 @@
+{
+  "asset_class": "Pump",
+  "manufacturer": "Grundfos",
+  "model_family": "CR/CRN",
+  "frequency_hz": null,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "3ea91b961639",
+  "filename": "07_grundfos_cr_crn_pump_manual.pdf",
+  "sha256": "3ea91b961639b757180844f296324c585ec28c10b63b24cefe6a14e9ae7efa51",
+  "document_status": "active"
+}

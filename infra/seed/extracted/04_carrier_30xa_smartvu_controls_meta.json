@@ -1,0 +1,12 @@
+{
+  "asset_class": "Chiller",
+  "manufacturer": "Carrier",
+  "model_family": "30XA",
+  "frequency_hz": 60,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "b450c63c4ce1",
+  "filename": "04_carrier_30xa_smartvu_controls.pdf",
+  "sha256": "b450c63c4ce1ffe4ae4f25281a5eefc34ea7bc1de7a0c5e1b3ca3c5a9bc29065",
+  "document_status": "active"
+}

@@ -1,0 +1,12 @@
+{
+  "asset_class": "UPS",
+  "manufacturer": "Eaton",
+  "model_family": "9PX G2",
+  "frequency_hz": null,
+  "provenance": "vendor_direct",
+  "doc_type": "oem_manual",
+  "document_id": "18bb239a328e",
+  "filename": "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+  "sha256": "18bb239a328e8e1ce3f26c38d22cbd187176f6badd3f93d1bd55d5cb873aeba4",
+  "document_status": "active"
+}

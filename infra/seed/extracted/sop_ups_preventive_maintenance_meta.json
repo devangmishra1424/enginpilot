@@ -1,0 +1,12 @@
+{
+  "asset_class": "UPS",
+  "manufacturer": "ENGINPILOT",
+  "model_family": "SOP",
+  "frequency_hz": null,
+  "provenance": "internal_approved",
+  "doc_type": "sop",
+  "document_id": "4b9811b95f6f",
+  "filename": "sop_ups_preventive_maintenance.pdf",
+  "sha256": "4b9811b95f6f48ba37d758abe051168a22053423cf81ed21b3b5382557a921f7",
+  "document_status": "active"
+}
