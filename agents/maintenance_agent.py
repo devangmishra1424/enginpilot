@@ -61,7 +61,22 @@ def run(question: str) -> dict:
     (Section 5.5) will turn this into "I don't have enough information."
     """
     asset_class = extract_asset_class(question)
-    chunks = qdrant_search.search(query=question, asset_class=asset_class)
+
+    # Build search kwargs dynamically — if the question names a specific asset,
+    # resolve its specs from the graph and pass model_family / frequency_hz as
+    # hard-wall filters, matching the reliability_agent.py pattern (lines 280-294).
+    search_kwargs = {"query": question, "asset_class": asset_class, "doc_type": "sop"}
+    asset_id = asset_agent.extract_asset_id(question)
+    if asset_id:
+        asset = cypher_query.get_asset(asset_id)
+        if asset:
+            specs = asset.get("specs", {})
+            if "model_family" in specs:
+                search_kwargs["model_family"] = specs["model_family"]
+            if "frequency_hz" in specs:
+                search_kwargs["frequency_hz"] = specs["frequency_hz"]
+
+    chunks = qdrant_search.search(**search_kwargs)
 
     if chunks and max(chunk["score"] for chunk in chunks) < RETRIEVAL_CONFIDENCE_FLOOR:
         # Confidence-gated answers guardrail (Section 7.3): a weak match is

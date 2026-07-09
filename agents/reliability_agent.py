@@ -42,12 +42,9 @@ _PORTFOLIO_KEYWORDS = [
     "assets at risk",
 ]
 
-# Matches physics.schemas.RiskLevel's actual values — the only bands a
-# genuine finding can ever be described with.
-_VALID_RISK_BANDS = {
-    "high risk", "medium risk", "low risk", "reduced life",
-    "alert", "warning", "inspection required",
-}
+# Derived directly from the RiskLevel enum — automatically stays in sync if
+# new bands are added to physics/schemas.py. Never manually maintain this set.
+_VALID_RISK_BANDS = {r.value.lower() for r in RiskLevel}
 _NUMERIC_SCORE_PATTERN = re.compile(
     r"\b\d{1,3}\s*/\s*100\b|\brisk score\b|\bconfidence score\b|\bout of 100\b", re.IGNORECASE
 )
@@ -276,7 +273,22 @@ def run(question: str) -> dict:
 
     # Optional supplementary context (Scenario 1 step 5): failure-mode manual
     # passage via RAG. Never fabricated if nothing comes back.
-    manual_chunks = qdrant_search.search(query=question, asset_class=asset["class"])
+    # Build search kwargs dynamically from asset specs
+    search_kwargs = {
+        "query": question, 
+        "asset_class": asset["class"], 
+        "doc_type": "oem_manual"
+    }
+    
+    # CRITICAL FIX: Pass hard-wall filters if available in specs
+    specs = asset.get("specs", {})
+    if "model_family" in specs:
+        search_kwargs["model_family"] = specs["model_family"]
+    if "frequency_hz" in specs:
+        search_kwargs["frequency_hz"] = specs["frequency_hz"]
+
+    # Now call search with the enriched kwargs
+    manual_chunks = qdrant_search.search(**search_kwargs)
     if manual_chunks and max(chunk["score"] for chunk in manual_chunks) < RETRIEVAL_CONFIDENCE_FLOOR:
         # Confidence-gated answers guardrail (Section 7.3): a weak match is
         # treated exactly like no match — this context is supplementary, so

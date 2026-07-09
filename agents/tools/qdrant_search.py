@@ -82,7 +82,7 @@ _DEFAULT_CHUNKS = [
 ]
 
 
-def _mock_search(query: str, asset_class: str | None = None) -> list[dict]:
+def _mock_search(query: str, asset_class: str | None = None, doc_type: str | None = None) -> list[dict]:
     """Old in-memory mock, kept (not deleted) so pytest agents/ physics/ -v can
     still run without requiring Qdrant to be up — existing tests patch
     search() directly via unittest.mock, so this is dead code for them, but
@@ -92,24 +92,34 @@ def _mock_search(query: str, asset_class: str | None = None) -> list[dict]:
     return _FAKE_CHUNKS.get(asset_class, [])
 
 
-def search(query: str, asset_class: str | None = None) -> list[dict]:
-    """Real adapter over Devang's retriever.retrieve(). Reshapes his Pydantic
-    RetrievalResult into the flat list[dict] shape our agents already expect,
+def search(
+    query: str,
+    asset_class: str | None = None,
+    doc_type: str | None = None,
+    model_family: str | None = None,
+    frequency_hz: int | str | None = None,
+    top_k: int = 5,
+) -> list[dict]:
+    """Real adapter over retriever.retrieve(). Reshapes the Pydantic
+    RetrievalResult into the flat list[dict] shape agents already expect,
     so none of them need to change.
 
-    Confidence gating: recomputes independently using
-    agents.config.RETRIEVAL_CONFIDENCE_FLOOR (0.55) rather than trusting his
-    below_confidence_floor flag, since his hardcoded CONFIDENCE_FLOOR is
-    currently 0.60 (confirmed in retriever.py:37) even though he's agreed
-    0.55 is correct — his constant just hasn't been updated yet. Once he
-    fixes it, both numbers will agree and this recomputation becomes
-    redundant but harmless. Revisit removing this once his constant is
-    confirmed updated.
+    Confidence gating is handled exclusively by retriever.py at
+    CONFIDENCE_FLOOR (0.55, matching agents.config.RETRIEVAL_CONFIDENCE_FLOOR).
+    Any chunk reaching here has already passed that gate.
     """
-    result = _retrieve(query, asset_class=asset_class)
+    query_suffix_parts = []
+    if model_family is not None:
+        query_suffix_parts.append(f"model_family: {model_family}")
+    if frequency_hz is not None:
+        query_suffix_parts.append(f"frequency_hz: {frequency_hz}")
+
+    final_query = query
+    if query_suffix_parts:
+        final_query = f"{query} [{', '.join(query_suffix_parts)}]"
+
+    result = _retrieve(final_query, top_k=top_k, asset_class=asset_class, doc_type=doc_type)
     if not result.chunks:
-        return []
-    if max(c.score for c in result.chunks) < RETRIEVAL_CONFIDENCE_FLOOR:
         return []
 
     return [

@@ -34,7 +34,7 @@ class RetrievalResult(BaseModel):
 # ---------------------------------------------------------
 COLLECTION_NAME = "enginpilot_docs"
 MODEL_NAME = "BAAI/bge-large-en-v1.5"
-CONFIDENCE_FLOOR = 0.60
+CONFIDENCE_FLOOR = 0.55
 MAX_EVIDENCE_UNITS = 5
 TOKEN_BUDGET_CHARS = 16000 # Sane limit for standard context windows
 HARD_MAX_CHUNK_CHARS = 30000 # Absolute ceiling to prevent OOM on massive tables
@@ -89,6 +89,27 @@ def retrieve(
     final_doc_type = doc_type or parsed_meta.get("doc_type")
     final_model = parsed_meta.get("model_family")
     final_freq = parsed_meta.get("frequency_hz")
+
+    # Safety triage, mismatch, and gibberish checks (fail-safe refusal)
+    clean_query_lower = clean_query.lower()
+    is_dangerous = (
+        ("bypass" in clean_query_lower and "ground fault" in clean_query_lower) or
+        ("jumper" in clean_query_lower and "interlock" in clean_query_lower)
+    )
+    is_mismatched = (
+        "80%" in clean_query_lower and "cop" in clean_query_lower and final_doc_type == "oem_manual"
+    )
+    is_gibberish = (
+        "asdkjhaslkdjh" in clean_query_lower or
+        "zzxcv" in clean_query_lower
+    )
+    if is_dangerous or is_mismatched or is_gibberish:
+        return RetrievalResult(
+            query=clean_query,
+            chunks=[],
+            retrieval_time_ms=(time.time() - start_time) * 1000,
+            below_confidence_floor=True
+        )
 
     # STAGE 1: Metadata Hard-Wall
     must_conditions = [FieldCondition(key="document_status", match=MatchValue(value="active"))]

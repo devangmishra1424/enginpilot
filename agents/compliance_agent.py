@@ -8,15 +8,17 @@ Information" — a false "Compliant" verdict is worse than no answer at all.
 import re
 from pathlib import Path
 
-from agents import maintenance_agent
+from agents import asset_agent, maintenance_agent
 from agents.config import RETRIEVAL_CONFIDENCE_FLOOR
-from agents.tools import qdrant_search
+from agents.tools import cypher_query, qdrant_search
 from llm import router
 
 _PROMPT_PATH = Path(__file__).parent / "prompts" / "compliance.md"
 _PROMPT_TEMPLATE = _PROMPT_PATH.read_text()
 
-_CITATION_MARKER_PATTERN = re.compile(r"\b(section|clause|page)\b", re.IGNORECASE)
+_CITATION_PATTERN = re.compile(
+    r"\b(section|clause|page|table|fig(?:ure)?)\s*\d[\w\-\.]*\b", re.IGNORECASE
+)
 
 
 def _insufficient_info_answer(question: str, asset_class: str | None, why: str, what_would_help: str) -> str:
@@ -46,7 +48,7 @@ def _has_specific_citation(answer: str, chunks: list[dict]) -> bool:
     lowered = answer.lower()
     if any(chunk["doc_name"].lower() in lowered for chunk in chunks):
         return True
-    return bool(_CITATION_MARKER_PATTERN.search(answer))
+    return bool(_CITATION_PATTERN.search(answer))
 
 
 def run(question: str, procedure_context: str | None = None) -> dict:
@@ -68,7 +70,22 @@ def run(question: str, procedure_context: str | None = None) -> dict:
     # Reuse the Maintenance Agent's asset/asset-class extraction — same
     # SOP-retrieval pattern, no need to duplicate the regex/keyword logic.
     asset_class = maintenance_agent.extract_asset_class(question)
-    chunks = qdrant_search.search(query=question, asset_class=asset_class)
+
+    # Build search kwargs dynamically — if the question names a specific asset,
+    # resolve its specs from the graph and pass model_family / frequency_hz as
+    # hard-wall filters, matching the reliability_agent.py pattern (lines 280-294).
+    search_kwargs = {"query": question, "asset_class": asset_class, "doc_type": "sop"}
+    asset_id = asset_agent.extract_asset_id(question)
+    if asset_id:
+        asset = cypher_query.get_asset(asset_id)
+        if asset:
+            specs = asset.get("specs", {})
+            if "model_family" in specs:
+                search_kwargs["model_family"] = specs["model_family"]
+            if "frequency_hz" in specs:
+                search_kwargs["frequency_hz"] = specs["frequency_hz"]
+
+    chunks = qdrant_search.search(**search_kwargs)
 
     if chunks and max(chunk["score"] for chunk in chunks) < RETRIEVAL_CONFIDENCE_FLOOR:
         # Confidence-gated answers guardrail (Section 7.3): a weak match is

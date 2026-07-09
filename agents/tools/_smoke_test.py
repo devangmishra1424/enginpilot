@@ -43,8 +43,8 @@ def check_llm():
 
 def check_mock_tools():
     print("=== agents.tools.qdrant_search.search ===")
-    print("UPS match:", qdrant_search.search("why is it overheating", asset_class="UPS"))
-    no_match = qdrant_search.search("generator maintenance procedure", asset_class="Generator")
+    print("UPS match:", qdrant_search.search("why is it overheating", asset_class="UPS", doc_type="oem_manual"))
+    no_match = qdrant_search.search("generator maintenance procedure", asset_class="Generator", doc_type="sop")
     print("Generator (no SOP indexed) no-match case:", no_match)
     assert no_match == []
     print()

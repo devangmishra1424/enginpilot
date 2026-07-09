@@ -5,11 +5,19 @@ temperature=0 always — this system needs faithful phrasing, not creativity
 """
 
 import os
-
+from pathlib import Path
 from dotenv import load_dotenv
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
-load_dotenv()
+root_env = Path(__file__).parent.parent / ".env"
+retrieval_env = Path(__file__).parent.parent / "backend" / "src" / "enginpilot" / "retrieval" / ".env"
+
+if root_env.exists():
+    load_dotenv(dotenv_path=root_env)
+elif retrieval_env.exists():
+    load_dotenv(dotenv_path=retrieval_env)
+else:
+    load_dotenv()
 
 DEFAULT_MODEL = "meta/llama-3.3-70b-instruct"
 

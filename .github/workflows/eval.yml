@@ -1,0 +1,49 @@
+name: Continuous RAG & Agent Evaluation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  evaluate-agents:
+    runs-on: ubuntu-latest
+    
+    # Spin up a real Qdrant container for the test run
+    services:
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:6333/healthz || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install Dependencies
+        run: uv sync
+
+      # Optional: If you have an ingestion script, run it here to populate the CI Qdrant instance
+      # - name: Seed Qdrant for CI
+      #   run: uv run python ingest_qdrant.py --ci-mode 
+
+      - name: Run Evaluation Harness
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          ENGINPILOT_USE_MOCK_GRAPH: "1" # Keeps Neo4j mocked for CI speed
+        run: uv run pytest evaluation/runner.py -v --tb=short
