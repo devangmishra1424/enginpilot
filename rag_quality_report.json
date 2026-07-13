@@ -1,0 +1,759 @@
+{
+  "M1_recall": {
+    "score": 0.938,
+    "empties": 0,
+    "rows": [
+      {
+        "query": "What is the internal ambient temperature limit for the Eaton 9PX UPS?",
+        "expected": "eaton_9px",
+        "class": "UPS",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "sop_battery_bank_inspection.pdf",
+          "sop_ups_preventive_maintenance.pdf"
+        ],
+        "infer_trigger": false
+      },
+      {
+        "query": "How do I put the Eaton 9PX UPS into bypass mode?",
+        "expected": "eaton_9px",
+        "class": "UPS",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf"
+        ],
+        "infer_trigger": false
+      },
+      {
+        "query": "What is the battery runtime behaviour of the Eaton 9PX?",
+        "expected": "eaton_9px",
+        "class": "UPS",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+          "sop_battery_bank_inspection.pdf",
+          "sop_ups_preventive_maintenance.pdf"
+        ],
+        "infer_trigger": false
+      },
+      {
+        "query": "What refrigerant does the Carrier 30XA chiller use?",
+        "expected": "carrier_30xa",
+        "class": "Chiller",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "03_carrier_30xa_chiller_iom.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "How is the 30XA SmartVU control interface navigated?",
+        "expected": "carrier_30xa_smartvu",
+        "class": "Chiller",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "04_carrier_30xa_smartvu_controls.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "What is the minimum chilled water flow requirement for the 30XA?",
+        "expected": "carrier_30xa",
+        "class": "Chiller",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "03_carrier_30xa_chiller_iom.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "What is the airflow arrangement for the Vertiv Liebert DS?",
+        "expected": "vertiv_liebert_ds",
+        "class": "CRAH",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "05_vertiv_liebert_ds_manual.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "How is the Vertiv Liebert DM split system configured?",
+        "expected": "vertiv_liebert_dm",
+        "class": "CRAH",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "06_vertiv_liebert_dm_manual.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "How do I reset the network interface on the APC AP88XX PDU?",
+        "expected": "apc_ap88xx",
+        "class": "PDU",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "Where are recent device events shown on the APC PDU?",
+        "expected": "apc_ap88xx",
+        "class": "PDU",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ],
+        "infer_trigger": false
+      },
+      {
+        "query": "What is the installation guidance for the Grundfos CR/CRN pump?",
+        "expected": "grundfos_cr",
+        "class": "Pump",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "07_grundfos_cr_crn_pump_manual.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "What is the maintenance guidance for the Grundfos CM pump?",
+        "expected": "grundfos_cm",
+        "class": "Pump",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "08_grundfos_cm_pump_manual.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "What are the cooling requirements for the ABB transformer?",
+        "expected": "abb_transformer",
+        "class": "Transformer",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "10_abb_transformer_manual.pdf"
+        ],
+        "infer_trigger": false
+      },
+      {
+        "query": "What are the preventive maintenance steps for the UPS?",
+        "expected": "sop_ups_preventive_maintenance",
+        "class": "UPS",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+          "sop_ups_preventive_maintenance.pdf"
+        ],
+        "infer_trigger": false
+      },
+      {
+        "query": "What is the chiller preventive maintenance procedure?",
+        "expected": "sop_chiller_preventive_maintenance",
+        "class": "Chiller",
+        "returned": 5,
+        "hit": false,
+        "got_sources": [
+          "03_carrier_30xa_chiller_iom.pdf"
+        ],
+        "infer_trigger": true
+      },
+      {
+        "query": "What is the battery bank inspection procedure?",
+        "expected": "sop_battery_bank_inspection",
+        "class": "Battery",
+        "returned": 5,
+        "hit": true,
+        "got_sources": [
+          "sop_battery_bank_inspection.pdf"
+        ],
+        "infer_trigger": false
+      }
+    ],
+    "grade": "PASS"
+  },
+  "M2_precision": {
+    "score": 0.963,
+    "grade": "PASS"
+  },
+  "M3_relevance": {
+    "mean_top_score": 0.755,
+    "frac_top>=0.60": 1.0,
+    "grade": "PASS"
+  },
+  "M4_hallucination_resistance": {
+    "score": 0.0,
+    "rejected": 0,
+    "total": 12,
+    "rows": [
+      {
+        "query": "What is the exact ISO 10816 velocity limit in mm/s for PUMP-07 mounting class?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "07_grundfos_cr_crn_pump_manual.pdf",
+          "08_grundfos_cm_pump_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the rated amperage of the main switchgear?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "03_carrier_30xa_chiller_iom.pdf"
+        ]
+      },
+      {
+        "query": "What is the maximum load in kW for server rack R-14?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the fuel tank capacity of the diesel generator?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "04_carrier_30xa_smartvu_controls.pdf",
+          "05_vertiv_liebert_ds_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the insulation resistance test procedure for the Eaton 9PX?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+          "07_grundfos_cr_crn_pump_manual.pdf",
+          "sop_battery_bank_inspection.pdf"
+        ]
+      },
+      {
+        "query": "What is the firmware version of the building management system controller?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "04_carrier_30xa_smartvu_controls.pdf",
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the water treatment schedule for the cooling tower?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "05_vertiv_liebert_ds_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the seismic bracing specification for the transformer?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "10_abb_transformer_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the fire suppression agent used in the data hall?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "05_vertiv_liebert_ds_manual.pdf",
+          "06_vertiv_liebert_dm_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the access control badge reader model number?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "03_carrier_30xa_chiller_iom.pdf",
+          "04_carrier_30xa_smartvu_controls.pdf",
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the SNMP OID map for temperature on the PDU?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ]
+      },
+      {
+        "query": "What is the exact amp-hour rating of the UPS battery string?",
+        "returned": 5,
+        "below_floor": false,
+        "correctly_rejected": false,
+        "leaked_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf"
+        ]
+      }
+    ],
+    "grade": "FAIL"
+  },
+  "M5_table_integrity": {
+    "score": 0.9,
+    "rows": [
+      {
+        "query": "List the physical and electrical specifications table for the Carrier 30XA chiller",
+        "returned": 5,
+        "max_table_rows": 0,
+        "has_separator": false,
+        "truncated": false,
+        "complete": false
+      },
+      {
+        "query": "What are the electrical data ratings for the 30XA?",
+        "returned": 5,
+        "max_table_rows": 56,
+        "has_separator": true,
+        "truncated": true,
+        "complete": true
+      },
+      {
+        "query": "Show the event and alarm codes for the APC AP88XX PDU",
+        "returned": 5,
+        "max_table_rows": 15,
+        "has_separator": true,
+        "truncated": true,
+        "complete": true
+      },
+      {
+        "query": "What are the dimensions and weights for the Vertiv Liebert DS?",
+        "returned": 5,
+        "max_table_rows": 115,
+        "has_separator": true,
+        "truncated": true,
+        "complete": true
+      },
+      {
+        "query": "What are the performance data values for the Grundfos CR pump?",
+        "returned": 5,
+        "max_table_rows": 24,
+        "has_separator": true,
+        "truncated": false,
+        "complete": true
+      },
+      {
+        "query": "What are the technical specification values for the Eaton 9PX UPS?",
+        "returned": 5,
+        "max_table_rows": 8,
+        "has_separator": true,
+        "truncated": false,
+        "complete": true
+      },
+      {
+        "query": "What are the fan and motor ratings for the CRAH unit?",
+        "returned": 5,
+        "max_table_rows": 98,
+        "has_separator": true,
+        "truncated": true,
+        "complete": true
+      },
+      {
+        "query": "List the refrigerant and compressor data for the 30XA",
+        "returned": 5,
+        "max_table_rows": 56,
+        "has_separator": true,
+        "truncated": true,
+        "complete": true
+      },
+      {
+        "query": "What are the operating condition limits table for the chiller?",
+        "returned": 5,
+        "max_table_rows": 47,
+        "has_separator": true,
+        "truncated": false,
+        "complete": true
+      },
+      {
+        "query": "What are the network configuration parameters for the APC PDU?",
+        "returned": 5,
+        "max_table_rows": 6,
+        "has_separator": true,
+        "truncated": true,
+        "complete": true
+      }
+    ],
+    "grade": "PASS"
+  },
+  "M6_step_completeness": {
+    "score": 0.7,
+    "rows": [
+      {
+        "query": "What are the step-by-step preventive maintenance steps for the UPS?",
+        "returned": 5,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "List the battery bank inspection steps in order",
+        "returned": 5,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "What is the chiller preventive maintenance procedure step by step?",
+        "returned": 5,
+        "steps_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "What is the commissioning procedure for the Grundfos CR pump?",
+        "returned": 2,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "What is the startup sequence for the Carrier 30XA chiller?",
+        "returned": 5,
+        "steps_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "What are the steps to reset the APC PDU network interface?",
+        "returned": 5,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "What is the shutdown procedure for the Vertiv Liebert DS?",
+        "returned": 5,
+        "steps_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "How do I replace the UPS battery module step by step?",
+        "returned": 5,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "What is the filter maintenance procedure for the CRAH?",
+        "returned": 2,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "What are the numbered maintenance tasks for the pump?",
+        "returned": 5,
+        "steps_found": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "contiguous": true
+      }
+    ],
+    "grade": "DEGRADED"
+  },
+  "M7_citation_integrity": {
+    "chunks_examined": 80,
+    "source_present_rate": 1.0,
+    "mangle_free_rate": 0.975,
+    "mangled_chunks": 2,
+    "examples": [
+      {
+        "source": "01_eaton_9px_1_3kva_ups_manual.pdf",
+        "mangled_token": "E_B_M"
+      },
+      {
+        "source": "01_eaton_9px_1_3kva_ups_manual.pdf",
+        "mangled_token": "E_B_M"
+      }
+    ],
+    "grade": "FAIL"
+  },
+  "M8_filter_precision": {
+    "score": 1.0,
+    "queries_recall_killed": 0,
+    "rows": [
+      {
+        "query": "loads on PDU-01",
+        "inferred_model_family": "Liebert DS",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 4,
+        "recall_killed": false,
+        "recall_reduced": true
+      },
+      {
+        "query": "chiller preventive maintenance plan",
+        "inferred_model_family": "30XA",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      },
+      {
+        "query": "DM sensor reading trend",
+        "inferred_model_family": "Liebert DM",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 19,
+        "recall_killed": false,
+        "recall_reduced": true
+      },
+      {
+        "query": "standard operating procedure for the UPS",
+        "inferred_model_family": "9PX Standard",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      },
+      {
+        "query": "DS airflow configuration",
+        "inferred_model_family": "Liebert DS",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      },
+      {
+        "query": "CM pump vibration limit",
+        "inferred_model_family": "CM",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 19,
+        "recall_killed": false,
+        "recall_reduced": true
+      },
+      {
+        "query": "g2 battery module replacement",
+        "inferred_model_family": "9PX G2",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      },
+      {
+        "query": "smartvu alarm history",
+        "inferred_model_family": null,
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      },
+      {
+        "query": "30xa condenser cleaning",
+        "inferred_model_family": "30XA",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      },
+      {
+        "query": "ap88xx outlet grouping",
+        "inferred_model_family": "AP88XX",
+        "above_floor_without_filter": 20,
+        "above_floor_with_filter": 20,
+        "recall_killed": false,
+        "recall_reduced": false
+      }
+    ],
+    "grade": "PASS"
+  },
+  "M9_paraphrase_robustness": {
+    "score": 0.5,
+    "rows": [
+      {
+        "group": "ups_temp",
+        "top_sources": [
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf"
+        ],
+        "consistent": false
+      },
+      {
+        "group": "pdu_reset",
+        "top_sources": [
+          "09_apc_ap88xx_pdu_manual.pdf",
+          "09_apc_ap88xx_pdu_manual.pdf",
+          "09_apc_ap88xx_pdu_manual.pdf"
+        ],
+        "consistent": true
+      },
+      {
+        "group": "chiller_refrig",
+        "top_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "03_carrier_30xa_chiller_iom.pdf",
+          "03_carrier_30xa_chiller_iom.pdf"
+        ],
+        "consistent": true
+      },
+      {
+        "group": "pump_vibration",
+        "top_sources": [
+          "08_grundfos_cm_pump_manual.pdf",
+          "07_grundfos_cr_crn_pump_manual.pdf",
+          "07_grundfos_cr_crn_pump_manual.pdf"
+        ],
+        "consistent": false
+      }
+    ],
+    "grade": "FAIL"
+  },
+  "M10_determinism": {
+    "score": 1.0,
+    "rows": [
+      {
+        "query": "What is the internal ambient temperature limit for the Eaton 9PX UPS?",
+        "identical": true
+      },
+      {
+        "query": "How do I put the Eaton 9PX UPS into bypass mode?",
+        "identical": true
+      },
+      {
+        "query": "What is the battery runtime behaviour of the Eaton 9PX?",
+        "identical": true
+      },
+      {
+        "query": "What refrigerant does the Carrier 30XA chiller use?",
+        "identical": true
+      },
+      {
+        "query": "How is the 30XA SmartVU control interface navigated?",
+        "identical": true
+      },
+      {
+        "query": "What is the minimum chilled water flow requirement for the 30XA?",
+        "identical": true
+      },
+      {
+        "query": "What is the airflow arrangement for the Vertiv Liebert DS?",
+        "identical": true
+      },
+      {
+        "query": "How is the Vertiv Liebert DM split system configured?",
+        "identical": true
+      },
+      {
+        "query": "How do I reset the network interface on the APC AP88XX PDU?",
+        "identical": true
+      },
+      {
+        "query": "Where are recent device events shown on the APC PDU?",
+        "identical": true
+      },
+      {
+        "query": "What is the installation guidance for the Grundfos CR/CRN pump?",
+        "identical": true
+      },
+      {
+        "query": "What is the maintenance guidance for the Grundfos CM pump?",
+        "identical": true
+      },
+      {
+        "query": "What are the cooling requirements for the ABB transformer?",
+        "identical": true
+      },
+      {
+        "query": "What are the preventive maintenance steps for the UPS?",
+        "identical": true
+      },
+      {
+        "query": "What is the chiller preventive maintenance procedure?",
+        "identical": true
+      },
+      {
+        "query": "What is the battery bank inspection procedure?",
+        "identical": true
+      }
+    ],
+    "grade": "PASS"
+  },
+  "M11_latency": {
+    "calls": 112,
+    "p50_ms": 268.8,
+    "p95_ms": 350.3,
+    "max_ms": 2497.9,
+    "grade": "PASS"
+  }
+}

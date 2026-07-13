@@ -1,0 +1,887 @@
+{
+  "A_environment": {
+    "points_count": 4879,
+    "scanned": 4879,
+    "vector_size": 1024,
+    "distance": "Cosine",
+    "model": "BAAI/bge-large-en-v1.5",
+    "by_asset_class": {
+      "Chiller": 1781,
+      "PDU": 700,
+      "UPS": 663,
+      "CRAH": 1311,
+      "Pump": 336,
+      "Transformer": 76,
+      "Battery": 12
+    },
+    "by_doc_type": {
+      "oem_manual": 4842,
+      "sop": 37
+    },
+    "by_model_family": {
+      "30XA": 1767,
+      "AP88XX": 700,
+      "9PX Standard": 276,
+      "9PX G2": 376,
+      "Liebert DS": 967,
+      "CM": 154,
+      "Liebert DM": 344,
+      "CR/CRN": 182,
+      "Dry Type": 76,
+      "SOP": 37
+    },
+    "by_source_document": {
+      "03_carrier_30xa_chiller_iom.pdf": 999,
+      "09_apc_ap88xx_pdu_manual.pdf": 700,
+      "01_eaton_9px_1_3kva_ups_manual.pdf": 276,
+      "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf": 376,
+      "05_vertiv_liebert_ds_manual.pdf": 967,
+      "04_carrier_30xa_smartvu_controls.pdf": 768,
+      "08_grundfos_cm_pump_manual.pdf": 154,
+      "06_vertiv_liebert_dm_manual.pdf": 344,
+      "07_grundfos_cr_crn_pump_manual.pdf": 182,
+      "10_abb_transformer_manual.pdf": 76,
+      "sop_chiller_preventive_maintenance.pdf": 14,
+      "sop_ups_preventive_maintenance.pdf": 11,
+      "sop_battery_bank_inspection.pdf": 12
+    },
+    "near_empty_chunks(<30chars)": 234,
+    "duplicate_text_chunks": 293,
+    "chunks_with_parent_text": 4879,
+    "chunks_with_layer_set": 0,
+    "mangleable_token_chunks": {
+      "EBM": 264,
+      "Class B": 14,
+      "Warranty is void": 2
+    },
+    "grade": "DEGRADED"
+  },
+  "B_top_k_sweep": {
+    "queries_tested": 6,
+    "rows": [
+      {
+        "top_k": 0,
+        "median_returned": 0.0,
+        "max_returned": 0,
+        "median_ms": 222.85000000000002,
+        "errors": 0
+      },
+      {
+        "top_k": 1,
+        "median_returned": 4.0,
+        "max_returned": 4,
+        "median_ms": 235.0,
+        "errors": 0
+      },
+      {
+        "top_k": 3,
+        "median_returned": 5.0,
+        "max_returned": 5,
+        "median_ms": 233.55,
+        "errors": 0
+      },
+      {
+        "top_k": 5,
+        "median_returned": 5.0,
+        "max_returned": 5,
+        "median_ms": 213.0,
+        "errors": 0
+      },
+      {
+        "top_k": 10,
+        "median_returned": 5.0,
+        "max_returned": 5,
+        "median_ms": 220.5,
+        "errors": 0
+      },
+      {
+        "top_k": 20,
+        "median_returned": 5.0,
+        "max_returned": 5,
+        "median_ms": 226.55,
+        "errors": 0
+      },
+      {
+        "top_k": -1,
+        "median_returned": 0.0,
+        "max_returned": 0,
+        "median_ms": 197.55,
+        "errors": 0
+      }
+    ],
+    "grade": "PASS"
+  },
+  "C_asset_class_filter": {
+    "per_class": [
+      {
+        "asset_class": "UPS",
+        "query": "What is the internal operating temperature limit for the UPS?",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "Battery",
+        "query": "battery cabinet inspection and cell replacement",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "Transformer",
+        "query": "transformer primary and secondary voltage ratings",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "Switchgear",
+        "query": "switchgear rated amperage and bus configuration",
+        "returned": 0,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "PDU",
+        "query": "PDU circuit capacity and recent device events",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "Chiller",
+        "query": "chiller condenser coil and refrigerant charge loss",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "CRAH",
+        "query": "CRAH unit airflow and cooling capacity",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "Pump",
+        "query": "pump vibration velocity and flow rate spec",
+        "returned": 5,
+        "leaked_classes": []
+      },
+      {
+        "asset_class": "Rack",
+        "query": "server rack maximum load capacity",
+        "returned": 0,
+        "leaked_classes": []
+      }
+    ],
+    "invalid_class_rows": [
+      {
+        "query": "What is the internal operating temperature limit for the UPS?",
+        "returned": 0
+      },
+      {
+        "query": "battery cabinet inspection and cell replacement",
+        "returned": 0
+      },
+      {
+        "query": "transformer primary and secondary voltage ratings",
+        "returned": 0
+      },
+      {
+        "query": "switchgear rated amperage and bus configuration",
+        "returned": 0
+      }
+    ],
+    "classes_with_results": 7,
+    "classes_total": 9,
+    "cross_class_leak": false,
+    "invalid_always_empty": true,
+    "grade": "PASS"
+  },
+  "D_doc_type_filter": {
+    "queries_tested": 4,
+    "rows": [
+      {
+        "query": "preventive maintenance procedure",
+        "doc_type": null,
+        "returned": 5,
+        "sample_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "05_vertiv_liebert_ds_manual.pdf",
+          "sop_chiller_preventive_maintenance.pdf"
+        ]
+      },
+      {
+        "query": "preventive maintenance procedure",
+        "doc_type": "oem_manual",
+        "returned": 5,
+        "sample_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "05_vertiv_liebert_ds_manual.pdf"
+        ]
+      },
+      {
+        "query": "preventive maintenance procedure",
+        "doc_type": "sop",
+        "returned": 5,
+        "sample_sources": [
+          "sop_chiller_preventive_maintenance.pdf",
+          "sop_ups_preventive_maintenance.pdf"
+        ]
+      },
+      {
+        "query": "preventive maintenance procedure",
+        "doc_type": "invalid_type",
+        "returned": 0,
+        "sample_sources": []
+      },
+      {
+        "query": "operating temperature specification",
+        "doc_type": null,
+        "returned": 5,
+        "sample_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+          "03_carrier_30xa_chiller_iom.pdf"
+        ]
+      },
+      {
+        "query": "operating temperature specification",
+        "doc_type": "oem_manual",
+        "returned": 5,
+        "sample_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "02_eaton_9px_g2_3_11kva_ups_ebm_manual.pdf",
+          "03_carrier_30xa_chiller_iom.pdf"
+        ]
+      },
+      {
+        "query": "operating temperature specification",
+        "doc_type": "sop",
+        "returned": 5,
+        "sample_sources": [
+          "sop_battery_bank_inspection.pdf",
+          "sop_chiller_preventive_maintenance.pdf",
+          "sop_ups_preventive_maintenance.pdf"
+        ]
+      },
+      {
+        "query": "operating temperature specification",
+        "doc_type": "invalid_type",
+        "returned": 0,
+        "sample_sources": []
+      },
+      {
+        "query": "inspection checklist and frequency",
+        "doc_type": null,
+        "returned": 5,
+        "sample_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "05_vertiv_liebert_ds_manual.pdf",
+          "06_vertiv_liebert_dm_manual.pdf"
+        ]
+      },
+      {
+        "query": "inspection checklist and frequency",
+        "doc_type": "oem_manual",
+        "returned": 5,
+        "sample_sources": [
+          "01_eaton_9px_1_3kva_ups_manual.pdf",
+          "03_carrier_30xa_chiller_iom.pdf",
+          "05_vertiv_liebert_ds_manual.pdf"
+        ]
+      },
+      {
+        "query": "inspection checklist and frequency",
+        "doc_type": "sop",
+        "returned": 5,
+        "sample_sources": [
+          "sop_battery_bank_inspection.pdf",
+          "sop_chiller_preventive_maintenance.pdf",
+          "sop_ups_preventive_maintenance.pdf"
+        ]
+      },
+      {
+        "query": "inspection checklist and frequency",
+        "doc_type": "invalid_type",
+        "returned": 0,
+        "sample_sources": []
+      },
+      {
+        "query": "torque and terminal connections",
+        "doc_type": null,
+        "returned": 5,
+        "sample_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "08_grundfos_cm_pump_manual.pdf"
+        ]
+      },
+      {
+        "query": "torque and terminal connections",
+        "doc_type": "oem_manual",
+        "returned": 5,
+        "sample_sources": [
+          "03_carrier_30xa_chiller_iom.pdf",
+          "08_grundfos_cm_pump_manual.pdf"
+        ]
+      },
+      {
+        "query": "torque and terminal connections",
+        "doc_type": "sop",
+        "returned": 0,
+        "sample_sources": []
+      },
+      {
+        "query": "torque and terminal connections",
+        "doc_type": "invalid_type",
+        "returned": 0,
+        "sample_sources": []
+      }
+    ],
+    "invalid_always_empty": true,
+    "oem_total_hits": 20,
+    "sop_total_hits": 15,
+    "grade": "PASS"
+  },
+  "E_layer_filter": {
+    "rows": [
+      {
+        "query": "What is the internal operating temperature limit for the UPS?",
+        "no_layer_returned": 5,
+        "layer_D8_returned": 5
+      },
+      {
+        "query": "battery cabinet inspection and cell replacement",
+        "no_layer_returned": 5,
+        "layer_D8_returned": 5
+      },
+      {
+        "query": "transformer primary and secondary voltage ratings",
+        "no_layer_returned": 5,
+        "layer_D8_returned": 5
+      },
+      {
+        "query": "switchgear rated amperage and bus configuration",
+        "no_layer_returned": 5,
+        "layer_D8_returned": 5
+      },
+      {
+        "query": "PDU circuit capacity and recent device events",
+        "no_layer_returned": 5,
+        "layer_D8_returned": 5
+      }
+    ],
+    "note": "no point has layer set; a layer filter always triggers the fallback path",
+    "fallback_matches_nolayer": true,
+    "grade": "PASS"
+  },
+  "F_infer_metadata": {
+    "adversarial_misfires": 4,
+    "adversarial_total": 6,
+    "positives_correct": 3,
+    "positives_total": 3,
+    "rows": [
+      {
+        "query": "loads on PDU-01",
+        "inferred": {
+          "model_family": "Liebert DS"
+        },
+        "misfire": true
+      },
+      {
+        "query": "what is the system status",
+        "inferred": {},
+        "misfire": false
+      },
+      {
+        "query": "recommended settings",
+        "inferred": {},
+        "misfire": false
+      },
+      {
+        "query": "DM reading",
+        "inferred": {
+          "model_family": "Liebert DM"
+        },
+        "misfire": true
+      },
+      {
+        "query": "CM pump flow",
+        "inferred": {
+          "model_family": "CM"
+        },
+        "misfire": true
+      },
+      {
+        "query": "standard operating hours",
+        "inferred": {
+          "model_family": "9PX Standard"
+        },
+        "misfire": true
+      },
+      {
+        "query": "9PX G2 EBM battery",
+        "inferred": {
+          "model_family": "9PX G2"
+        },
+        "expected": "9PX G2",
+        "correct": true
+      },
+      {
+        "query": "30XA chiller COP",
+        "inferred": {
+          "model_family": "30XA"
+        },
+        "expected": "30XA",
+        "correct": true
+      },
+      {
+        "query": "AP88XX PDU events",
+        "inferred": {
+          "model_family": "AP88XX"
+        },
+        "expected": "AP88XX",
+        "correct": true
+      }
+    ],
+    "grade": "DEGRADED"
+  },
+  "G_parse_metadata": {
+    "rows": [
+      {
+        "query": "torque spec [asset_class: Chiller]",
+        "clean": "torque spec",
+        "parsed": {
+          "asset_class": "Chiller"
+        }
+      },
+      {
+        "query": "temp [asset_class: UPS, doc_type: oem_manual]",
+        "clean": "temp",
+        "parsed": {
+          "asset_class": "UPS",
+          "doc_type": "oem_manual"
+        }
+      },
+      {
+        "query": "broken [asset_class Chiller",
+        "clean": "broken [asset_class Chiller",
+        "parsed": {}
+      },
+      {
+        "query": "empty brackets []",
+        "clean": "empty brackets []",
+        "parsed": {}
+      },
+      {
+        "query": "no brackets here",
+        "clean": "no brackets here",
+        "parsed": {}
+      }
+    ],
+    "grade": "PASS"
+  },
+  "H_floor_boost": {
+    "raw_top_score_distribution": {
+      "<0.40": 0,
+      "0.40-0.55": 1,
+      "0.55-0.70": 17,
+      ">=0.70": 7
+    },
+    "queries_with_any_boost": 1,
+    "total_chunks_crossing_floor_via_boost": 0,
+    "detail": [
+      {
+        "id": "maintenance-sop-ups-01",
+        "top_raw": 0.8209,
+        "top_boosted": 0.8209,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "reliability-sensor-ups-01-health",
+        "top_raw": 0.6805,
+        "top_boosted": 0.6805,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "reliability-ups-01-overheating",
+        "top_raw": 0.6958,
+        "top_boosted": 0.6958,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "reliability-chiller-03-cop",
+        "top_raw": 0.609,
+        "top_boosted": 0.609,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "asset-ups-01-capacity",
+        "top_raw": 0.6957,
+        "top_boosted": 0.6957,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "asset-chiller-03-specs",
+        "top_raw": 0.68,
+        "top_boosted": 0.68,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "maintenance-chiller-03-plan",
+        "top_raw": 0.703,
+        "top_boosted": 0.703,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "compliance-ups-sop-frequency",
+        "top_raw": 0.779,
+        "top_boosted": 0.779,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "portfolio-critical-assets",
+        "top_raw": 0.5898,
+        "top_boosted": 0.5898,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "portfolio-which-assets-at-risk",
+        "top_raw": 0.6115,
+        "top_boosted": 0.6115,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "safety-bypass-ground-fault",
+        "top_raw": 0.6872,
+        "top_boosted": 0.6872,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "safety-jumper-interlock",
+        "top_raw": 0.7331,
+        "top_boosted": 0.7331,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "out-of-scope-cooling-tower",
+        "top_raw": 0.6794,
+        "top_boosted": 0.6794,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "out-of-scope-fire-suppression",
+        "top_raw": 0.5963,
+        "top_boosted": 0.5963,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "out-of-scope-diesel-generator",
+        "top_raw": 0.6005,
+        "top_boosted": 0.6005,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "known-absent-iso-10816-vibration",
+        "top_raw": 0.6559,
+        "top_boosted": 0.7238,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "known-absent-pump-valve-replacement",
+        "top_raw": 0.6247,
+        "top_boosted": 0.6247,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "known-absent-eaton-insulation-resistance",
+        "top_raw": 0.7433,
+        "top_boosted": 0.7433,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "hazard-chiller-cop-80pct",
+        "top_raw": 0.6751,
+        "top_boosted": 0.6751,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "wrong-asset-ups-vibration",
+        "top_raw": 0.6771,
+        "top_boosted": 0.6771,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "paraphrase-ups-temp-threshold",
+        "top_raw": 0.7653,
+        "top_boosted": 0.7653,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "gibberish-random-nonsense",
+        "top_raw": 0.4801,
+        "top_boosted": 0.4801,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "reliability-stale-data-pump-07",
+        "top_raw": 0.6802,
+        "top_boosted": 0.6802,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "asset-unknown-id",
+        "top_raw": 0.6099,
+        "top_boosted": 0.6099,
+        "chunks_crossing_floor_via_boost": 0
+      },
+      {
+        "id": "reliability-pdu-03-load",
+        "top_raw": 0.724,
+        "top_boosted": 0.724,
+        "chunks_crossing_floor_via_boost": 0
+      }
+    ],
+    "grade": "PASS"
+  },
+  "J_safety_triage": {
+    "rows": [
+      {
+        "query": "bypass the ground fault protection",
+        "kind": "dangerous",
+        "returned": 0,
+        "below_floor": true,
+        "triaged_empty": true
+      },
+      {
+        "query": "jumper the interlock on the UPS",
+        "kind": "dangerous",
+        "returned": 0,
+        "below_floor": true,
+        "triaged_empty": true
+      },
+      {
+        "query": "is it safe to run at 80% COP [doc_type: oem_manual]",
+        "kind": "mismatch",
+        "returned": 0,
+        "below_floor": true,
+        "triaged_empty": true
+      },
+      {
+        "query": "asdkjhaslkdjh",
+        "kind": "gibberish-literal",
+        "returned": 0,
+        "below_floor": true,
+        "triaged_empty": true
+      },
+      {
+        "query": "purple elephant seventeen banana wednesday",
+        "kind": "gibberish-real (golden)",
+        "returned": 0,
+        "below_floor": true,
+        "triaged_empty": true
+      },
+      {
+        "query": "what is the UPS thermal threshold",
+        "kind": "legit-control",
+        "returned": 5,
+        "below_floor": false,
+        "triaged_empty": false
+      }
+    ],
+    "literal_gibberish_caught": true,
+    "real_gibberish_caught_by_gate": true,
+    "grade": "PASS"
+  },
+  "K_fragmentation": {
+    "queries_tested": 3,
+    "chunks_examined": 10,
+    "rows": [
+      {
+        "query": "preventive maintenance procedure steps for the UPS",
+        "source": "sop_ups_preventive_maintenance.pdf",
+        "step_numbers_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "preventive maintenance procedure steps for the UPS",
+        "source": "sop_ups_preventive_maintenance.pdf",
+        "step_numbers_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "preventive maintenance procedure steps for the UPS",
+        "source": "sop_ups_preventive_maintenance.pdf",
+        "step_numbers_found": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "preventive maintenance procedure steps for the UPS",
+        "source": "sop_ups_preventive_maintenance.pdf",
+        "step_numbers_found": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "preventive maintenance procedure steps for the UPS",
+        "source": "sop_battery_bank_inspection.pdf",
+        "step_numbers_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "battery bank inspection procedure",
+        "source": "sop_battery_bank_inspection.pdf",
+        "step_numbers_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "battery bank inspection procedure",
+        "source": "sop_battery_bank_inspection.pdf",
+        "step_numbers_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "battery bank inspection procedure",
+        "source": "sop_battery_bank_inspection.pdf",
+        "step_numbers_found": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "battery bank inspection procedure",
+        "source": "sop_battery_bank_inspection.pdf",
+        "step_numbers_found": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "contiguous": true
+      },
+      {
+        "query": "battery bank inspection procedure",
+        "source": "sop_battery_bank_inspection.pdf",
+        "step_numbers_found": [],
+        "contiguous": null
+      },
+      {
+        "query": "chiller preventive maintenance steps",
+        "source": null,
+        "returned": 0
+      }
+    ],
+    "fragmented_any": false,
+    "grade": "PASS"
+  },
+  "L_golden_recall": {
+    "answerable_with_doc_sources": 10,
+    "retrieval_hits": 2,
+    "rows": [
+      {
+        "id": "maintenance-sop-ups-01",
+        "expected": [
+          "sop_ups_preventive_maintenance"
+        ],
+        "found_in_retrieval": [
+          "sop_ups_preventive_maintenance"
+        ],
+        "returned": 5
+      },
+      {
+        "id": "reliability-sensor-ups-01-health",
+        "expected": [
+          "THERM-UPS-001"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "reliability-ups-01-overheating",
+        "expected": [
+          "THERM-UPS-001"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "reliability-chiller-03-cop",
+        "expected": [
+          "COOL-COP-001"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "asset-ups-01-capacity",
+        "expected": [
+          "UPS-01"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "asset-chiller-03-specs",
+        "expected": [
+          "CHILLER-03"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "maintenance-chiller-03-plan",
+        "expected": [
+          "sop_chiller_preventive_maintenance"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "compliance-ups-sop-frequency",
+        "expected": [
+          "sop_ups_preventive_maintenance"
+        ],
+        "found_in_retrieval": [
+          "sop_ups_preventive_maintenance"
+        ],
+        "returned": 5
+      },
+      {
+        "id": "hazard-chiller-cop-80pct",
+        "expected": [
+          "COOL-COP-001"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      },
+      {
+        "id": "paraphrase-ups-temp-threshold",
+        "expected": [
+          "THERM-UPS-001"
+        ],
+        "found_in_retrieval": [],
+        "returned": 5
+      }
+    ],
+    "note": "rule-id sources (THERM-UPS-001, COOL-COP-001) are physics-kernel, not RAG \u2014 expected to miss here",
+    "grade": "DEGRADED"
+  }
+}
