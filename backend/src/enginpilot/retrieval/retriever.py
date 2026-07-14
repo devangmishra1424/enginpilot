@@ -2,6 +2,8 @@ import time
 import os
 import sys
 import re
+import functools
+import logging
 from typing import Literal, Optional, Dict, List, Any
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
@@ -11,7 +13,7 @@ from sentence_transformers import SentenceTransformer
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../')))
 
 # ---------------------------------------------------------
-# 1. THE FROZEN CONTRACT (STRICT 4 PARAMETERS + ONTOLOGY FIELD)
+# 1. THE FROZEN CONTRACT (STRICT 4-PARAMETER CONTRACT)
 # ---------------------------------------------------------
 class RetrievedChunk(BaseModel):
     chunk_id: str
@@ -21,7 +23,6 @@ class RetrievedChunk(BaseModel):
     page: Optional[int] = None
     asset_class: Optional[str] = None
     manufacturer: Optional[str] = None
-    layer: Optional[str] = None  # <--- NEW: Ontology Layer
     score: float = Field(ge=0.0, le=1.0)
 
 class RetrievalResult(BaseModel):
@@ -47,9 +48,19 @@ TOKEN_BUDGET_CHARS = 16000 # Sane limit for standard context windows
 HARD_MAX_CHUNK_CHARS = 30000 # Absolute ceiling to prevent OOM on massive tables
 BGE_QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
-import functools
-import logging
-import os
+# Cross-encoder reranker — Stage-2 ranking + the confidence gate. Bi-encoder
+# cosine + a single global floor could not separate relevant from off-corpus
+# (measured gap ~0.04); a cross-encoder scores the query-passage pair jointly
+# and separates them by ~2 full logits (autopsy: in-corpus +2.9..+5.2 vs
+# off-corpus -1.5..-0.07). If it can't load offline the pipeline falls back to
+# the cosine CONFIDENCE_FLOOR, so retrieval degrades gracefully, never breaks.
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+RERANKER_FLOOR = 0.0    # CE-logit gate; calibrate on a larger labeled set before pilot
+RERANK_CHARS = 2000     # max passage chars fed to the cross-encoder (~512 tokens)
+RERANK_CANDIDATES = 50  # candidates re-scored per query. Wider than the top-k so
+                        # dense spec tables with only moderate cosine still reach
+                        # the cross-encoder (ground-truth eval showed tables fell
+                        # outside a 24-candidate window). Costs latency, accepted.
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +70,20 @@ def _get_embedder():
     """Lazy-load the embedding model once on first use, not at import time."""
     logger.info("Loading embedding model (%s)...", MODEL_NAME)
     return SentenceTransformer(MODEL_NAME)
+
+
+@functools.lru_cache(maxsize=1)
+def _get_reranker():
+    """Lazy-load the cross-encoder reranker once. Returns None (pipeline then
+    falls back to the cosine floor) if sentence-transformers can't load it
+    offline — so a missing model degrades quality, never crashes retrieval."""
+    try:
+        from sentence_transformers import CrossEncoder
+        logger.info("Loading cross-encoder reranker (%s)...", RERANKER_MODEL)
+        return CrossEncoder(RERANKER_MODEL, max_length=512)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Reranker unavailable (%s); falling back to cosine floor.", e)
+        return None
 
 
 @functools.lru_cache(maxsize=1)
@@ -153,28 +178,47 @@ def infer_metadata(query: str) -> dict:
     return inferred
 
 
-def boost_scores_lexically(query: str, points: list) -> list:
-    q_words = set(re.findall(r'\w+', query.lower()))
-    boost_terms = {"warranty", "void", "marine", "frequency", "password", "fcc", "class", "carrier", "15 days", "damage", "acceptance"}
-    matching_boost_terms = boost_terms.intersection(q_words)
-    
-    # Also support multi-word boost triggers like "15 days"
-    q_lower = query.lower()
-    has_15_days = "15 days" in q_lower
-    
-    if not matching_boost_terms and not has_15_days:
-        return points
-        
-    for p in points:
-        text = (p.payload.get("text", "") + " " + p.payload.get("parent_text", "")).lower()
-        matches = sum(1 for term in matching_boost_terms if term in text)
-        if has_15_days and "15 days" in text:
-            matches += 1
-        if matches > 0:
-            # Boost the score by 0.10 per match (max 0.20)
-            p.score += min(0.20, 0.10 * matches)
-            
-    return points
+# NOTE: an earlier lexical-overlap re-rank ("boost_scores_lexically") was
+# removed. Its original purpose was gaming specific gauntlet asserts via a
+# hardcoded term list; once the confidence floor was moved onto raw cosine
+# (fix #12) the boost only affected ranking, and a generic word-overlap boost
+# measurably HURT paraphrase robustness (rewarding literal word matches is
+# anti-paraphrase by construction). Ranking is now pure cosine plus the small
+# inferred-model nudge in retrieve(). A trained cross-encoder reranker is the
+# right long-term ranking signal (Phase 2, out of MVP scope).
+
+def _ce_passage(query_words: set, payload: dict) -> str:
+    """Build the passage handed to the cross-encoder.
+
+    The cross-encoder only sees ~512 tokens. For a long chunk — a dense spec
+    table above all — a naive text[:RERANK_CHARS] prefix often stops before the
+    answer row (e.g. 'Rated voltage | 400 V'), so the CE under-scores a table
+    that genuinely answers the query, which is the measured cause of weak
+    table/spec retrieval. Instead, give the CE the header plus the lines most
+    lexically relevant to the query, keeping answer-bearing rows inside the
+    window. This changes only what the CE *sees for scoring*; the full
+    parent_text is still what gets returned to the caller. Short chunks pass
+    through unchanged.
+    """
+    text = payload.get("parent_text") or payload.get("text") or ""
+    if len(text) <= RERANK_CHARS:
+        return text
+    lines = text.splitlines()
+    if len(lines) <= 4:
+        return text[:RERANK_CHARS]
+    header = lines[:2]
+    body = sorted(lines[2:],
+                  key=lambda ln: sum(1 for w in query_words if w in ln.lower()),
+                  reverse=True)
+    picked = list(header)
+    size = sum(len(x) + 1 for x in header)
+    for ln in body:
+        if size + len(ln) + 1 > RERANK_CHARS:
+            break
+        picked.append(ln)
+        size += len(ln) + 1
+    return "\n".join(picked)
+
 
 # ---------------------------------------------------------
 # 4. THE RETRIEVE FUNCTION
@@ -184,9 +228,13 @@ def retrieve(
     top_k: int = 5,
     asset_class: Optional[str] = None,
     doc_type: Optional[Literal["oem_manual", "sop"]] = None,
-    layer: Optional[str] = None,  # <--- NEW: Ontology Layer Filter
 ) -> RetrievalResult:
+    """Return up to min(top_k, MAX_EVIDENCE_UNITS) parent-grouped chunks whose
+    RAW cosine similarity clears CONFIDENCE_FLOOR, ranked by boosted score.
+    top_k is clamped to >= 1 (0/negative would silently return nothing).
+    """
     start_time = time.time()
+    top_k = max(1, top_k)  # guard: 0/negative would over-fetch limit<=0 -> empty
 
     # Parse any metadata folded into the query by the Agentic Lead
     clean_query, parsed_meta = parse_agentic_metadata(query)
@@ -199,11 +247,11 @@ def retrieve(
     explicit_model = parsed_meta.get("model_family")
     final_freq = parsed_meta.get("frequency_hz")
 
+    # Inferred frequency is still used as a soft hint; inferred model_family is
+    # intentionally NOT used to rank/filter — the cross-encoder now handles
+    # relevance ranking far better than a keyword nudge could.
     inferred_meta = infer_metadata(clean_query)
-    inferred_model = inferred_meta.get("model_family")
     final_freq = final_freq or inferred_meta.get("frequency_hz")
-
-    final_layer = layer or parsed_meta.get("layer")
 
     # Safety triage, mismatch, and gibberish checks (fail-safe refusal)
     clean_query_lower = clean_query.lower()
@@ -235,8 +283,6 @@ def retrieve(
         must_conditions.append(FieldCondition(key="doc_type", match=MatchValue(value=final_doc_type)))
     if explicit_model:  # only an EXPLICIT model_family is a hard wall; inferred is a rank hint
         must_conditions.append(FieldCondition(key="model_family", match=MatchValue(value=explicit_model)))
-    if final_layer:
-        must_conditions.append(FieldCondition(key="layer", match=MatchValue(value=final_layer)))
     if final_freq:
         try:
             freq_val = int(final_freq)
@@ -249,76 +295,52 @@ def retrieve(
     # Embed the CLEAN query (without the metadata brackets)
     query_vector = _get_embedder().encode(BGE_QUERY_PREFIX + clean_query, normalize_embeddings=True).tolist()
 
-    # Capture the TRUE cosine BEFORE any boosting, then apply the lexical +
-    # inferred-model rank boosts. The confidence floor gates on raw_scores (so
-    # a boost can never push a weak match past the safety floor); boosts only
-    # re-rank what already qualifies. Keyed by point id (unique per chunk).
-    raw_scores: Dict[Any, float] = {}
-
-    def _rank(points):
-        for p in points:
-            raw_scores[p.id] = p.score
-        boost_scores_lexically(clean_query, points)
-        if inferred_model:  # inferred family: small rank nudge, never a filter
-            for p in points:
-                if p.payload.get("model_family") == inferred_model:
-                    p.score += 0.05
-        return points
-
-    def _passes_floor(p) -> bool:
-        return raw_scores.get(p.id, 0.0) >= CONFIDENCE_FLOOR
-
+    # Over-fetch candidates by cosine, then re-rank + gate. Raw cosine (0..1)
+    # stays the REPORTED similarity (frozen contract); ranking and the
+    # confidence gate use the cross-encoder when available — far cleaner
+    # relevant/off-corpus separation — else fall back to the cosine floor.
     try:
-        # Standard single query, respecting top_k
         response = _get_qdrant_client().query_points(
             collection_name=COLLECTION_NAME,
             query=query_vector,
             query_filter=qdrant_filter,
-            limit=top_k * 4 # Over-fetch slightly for diversity grouping
+            limit=max(RERANK_CANDIDATES, top_k * 4),
         )
-        search_result = _rank(response.points)
+        candidates = response.points
     except Exception as e:
         logger.error("Qdrant search error: %s", e)
         return RetrievalResult(query=clean_query, chunks=[], retrieval_time_ms=0.0, below_confidence_floor=True)
 
-    # Any candidate above the floor on its RAW cosine?
-    has_valid_anchor = any(_passes_floor(res) for res in search_result)
-
-    # Fallback: if no valid results found and final_layer filter was applied, search again without final_layer
-    if not has_valid_anchor and final_layer:
-        logger.info("No valid results found for layer %s. Retrying without layer filter.", final_layer)
-        fallback_conditions = [c for c in must_conditions if getattr(c, "key", None) != "layer"]
-        fallback_filter = Filter(must=fallback_conditions)
-        try:
-            response = _get_qdrant_client().query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_vector,
-                query_filter=fallback_filter,
-                limit=top_k * 4
-            )
-            search_result = _rank(response.points)
-        except Exception as e:
-            logger.error("Qdrant fallback search error: %s", e)
-
-    if not search_result:
+    if not candidates:
         return RetrievalResult(query=clean_query, chunks=[], retrieval_time_ms=(time.time() - start_time) * 1000, below_confidence_floor=True)
 
-    # STAGE 2: Per-Section Grouping & Confidence Check (gate on RAW cosine, rank on boosted)
+    raw_cos: Dict[Any, float] = {p.id: p.score for p in candidates}
+
+    reranker = _get_reranker()
+    if reranker is not None:
+        q_words = {w for w in re.findall(r"[a-z0-9]{3,}", clean_query.lower())}
+        pairs = [(clean_query, _ce_passage(q_words, p.payload)) for p in candidates]
+        ce = reranker.predict(pairs)
+        rank_score: Dict[Any, float] = {p.id: float(s) for p, s in zip(candidates, ce)}
+        gate = RERANKER_FLOOR
+    else:  # graceful fallback: rank + gate on raw cosine
+        rank_score = dict(raw_cos)
+        gate = CONFIDENCE_FLOOR
+
+    # STAGE 2: gate on rank_score, then group by parent section (best per group)
     parent_groups: Dict[str, Any] = {}
-    for res in search_result:
-        if not _passes_floor(res):
+    for p in candidates:
+        if rank_score[p.id] < gate:
             continue
-        parent_txt = res.payload.get("parent_text", res.payload.get("text", ""))
+        parent_txt = p.payload.get("parent_text", p.payload.get("text", ""))
         if not parent_txt:
             continue
-        # Normalize/strip whitespace for robust grouping key
-        group_key = parent_txt.strip()
-        if group_key not in parent_groups or res.score > parent_groups[group_key].score:
-            parent_groups[group_key] = res
+        key = parent_txt.strip()  # robust grouping key
+        if key not in parent_groups or rank_score[p.id] > rank_score[parent_groups[key].id]:
+            parent_groups[key] = p
 
-    diverse_anchors = list(parent_groups.values())
-    diverse_anchors.sort(key=lambda x: x.score, reverse=True)
-    diverse_anchors = diverse_anchors[:MAX_EVIDENCE_UNITS]
+    diverse_anchors = sorted(parent_groups.values(), key=lambda p: rank_score[p.id], reverse=True)
+    diverse_anchors = diverse_anchors[:min(top_k, MAX_EVIDENCE_UNITS)]
 
     if not diverse_anchors:
         return RetrievalResult(query=clean_query, chunks=[], retrieval_time_ms=(time.time() - start_time) * 1000, below_confidence_floor=True)
@@ -328,6 +350,13 @@ def retrieve(
     char_budget = TOKEN_BUDGET_CHARS
 
     for anchor in diverse_anchors:
+        # Stop once the token budget is spent. Critical: never fall through to
+        # parent_text[:char_budget] with a negative budget — that slices off
+        # the TAIL of the chunk (Python negative indexing), silently dropping
+        # the end of a table or procedure instead of trimming the front.
+        if char_budget <= 0:
+            break
+
         # Return the retrieved source text verbatim — never rewrite citation
         # content (previously "EBM"->"E_B_M" etc. to satisfy must_not_contain
         # gauntlet asserts; that corrupted real citations. Cross-asset bleed is
@@ -335,17 +364,17 @@ def retrieve(
         parent_text = anchor.payload.get("parent_text", anchor.payload.get("text", ""))
         content_type = anchor.payload.get("content_type", "narrative")
 
-        # Content-aware truncation with hard ceiling
-        if len(parent_text) > char_budget:
-            if content_type in ("procedure", "warning", "table"):
-                # Don't truncate mid-sentence, but enforce a hard ceiling to prevent OOM
-                if len(parent_text) > HARD_MAX_CHUNK_CHARS:
-                    parent_text = parent_text[:HARD_MAX_CHUNK_CHARS] + "\n...[TRUNCATED AT HARD CEILING]"
-            else:
-                parent_text = parent_text[:char_budget] + "\n...[TRUNCATED FOR BUDGET]"
+        # Content-aware truncation. Procedures / warnings / tables are kept
+        # whole (up to a hard OOM ceiling) so numbered steps and table rows are
+        # never split mid-structure; only narrative prose is trimmed to budget.
+        if content_type in ("procedure", "warning", "table"):
+            if len(parent_text) > HARD_MAX_CHUNK_CHARS:
+                parent_text = parent_text[:HARD_MAX_CHUNK_CHARS] + "\n...[TRUNCATED AT HARD CEILING]"
+        elif len(parent_text) > char_budget:
+            parent_text = parent_text[:char_budget] + "\n...[TRUNCATED FOR BUDGET]"
 
-        # Report the TRUE cosine similarity (raw), not the internal rank score.
-        clipped_score = max(0.0, min(1.0, raw_scores.get(anchor.id, anchor.score)))
+        # Report the TRUE cosine similarity (raw), not the cross-encoder logit.
+        clipped_score = max(0.0, min(1.0, raw_cos.get(anchor.id, 0.0)))
 
         expanded_chunks.append(RetrievedChunk(
             chunk_id=str(anchor.id),
@@ -355,7 +384,6 @@ def retrieve(
             page=anchor.payload.get("page"),
             asset_class=anchor.payload.get("asset_class"),
             manufacturer=anchor.payload.get("manufacturer"),
-            layer=anchor.payload.get("layer"),  # <--- NEW: Expose Layer
             score=clipped_score
         ))
         char_budget -= len(parent_text)

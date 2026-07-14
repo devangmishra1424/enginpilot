@@ -1,0 +1,85 @@
+{
+  "A_corpus": {
+    "chunks": 5657,
+    "content_types": {
+      "narrative": 4562,
+      "warning": 345,
+      "procedure": 496,
+      "diagnostic": 112,
+      "table": 142
+    },
+    "asset_classes": {
+      "UPS": 704,
+      "Chiller": 1235,
+      "CRAH": 1581,
+      "Pump": 564,
+      "PDU": 1449,
+      "Transformer": 98,
+      "Battery": 26
+    },
+    "near_empty": 1164,
+    "duplicate_texts": 870,
+    "missing_classes": [
+      "Switchgear",
+      "Rack"
+    ]
+  },
+  "B_known_item": {
+    "sampled": 52,
+    "hits": 38,
+    "recall": 0.731,
+    "by_content_type": {
+      "narrative": "6/7",
+      "warning": "10/12",
+      "procedure": "8/11",
+      "diagnostic": "8/10",
+      "table": "6/12"
+    },
+    "grade": "DEGRADED"
+  },
+  "C_numeric_fact": {
+    "sampled": 40,
+    "hits": 36,
+    "answerable": 0.9,
+    "sample_misses": [
+      {
+        "fact": "118A",
+        "doc": "03_carrier_30xa_chiller_iom.pdf",
+        "section": "Contents"
+      },
+      {
+        "fact": "24 V",
+        "doc": "03_carrier_30xa_chiller_iom.pdf",
+        "section": "4.4 - Electrical data"
+      },
+      {
+        "fact": "406 V",
+        "doc": "03_carrier_30xa_chiller_iom.pdf",
+        "section": "example:"
+      },
+      {
+        "fact": "3.2 mm",
+        "doc": "05_vertiv_liebert_ds_manual.pdf",
+        "section": "Notes:"
+      }
+    ],
+    "grade": "PASS"
+  },
+  "D_structured": {
+    "table_answerable": 1.0,
+    "procedure_answerable": 0.467,
+    "table_grade": "PASS",
+    "proc_grade": "FAIL"
+  },
+  "E_safety": {
+    "hallucination_rejection": 1.0,
+    "safety_refusal": 1.0,
+    "hr_grade": "PASS",
+    "sr_grade": "PASS"
+  },
+  "latency": {
+    "p50_ms": 5319.0,
+    "p95_ms": 6374.0,
+    "calls": 133
+  }
+}

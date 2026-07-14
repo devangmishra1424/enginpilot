@@ -157,7 +157,26 @@ Built `rag_validation_suite.py` (24 parameters, 10+ queries each). **Ran it once
 Tiers 1–4 (#3–#11, #14) are unchanged from §2 above — ingestion consolidation, CI fix, secret rotation, packaging, and the newly-surfaced P10/P11/P19/P22/P24 items are all still open. Recommend a single follow-up investigation pass (not several small ones) once you're ready.
 
 ### TIER 4 — Explicitly NOT doing (playbook-aligned / YAGNI)
-Multi-tenant, IAM/RBAC on RAG, self-hosted embeddings (NIM/Triton), swapping Qdrant, GraphRAG, trained reranker — all Phase 2+ per playbook §1.2/§9.4/§14.7. Over-engineering now.
+Multi-tenant, IAM/RBAC on RAG, self-hosted embeddings (NIM/Triton), swapping Qdrant, GraphRAG — Phase 2+ per playbook §1.2/§9.4/§14.7. (A cross-encoder reranker WAS added — see §13 — after the user explicitly lifted MVP scope to pursue enterprise-grade quality.)
+
+---
+
+## 13. Cross-encoder reranker + table-aware retrieval — IMPLEMENTED (scope lifted by user)
+
+`cross-encoder/ms-marco-MiniLM-L-6-v2` added as a Stage-2 reranker + confidence gate in `retriever.py`, with graceful fallback to the cosine floor if the model can't load offline. Motivation: a bi-encoder cosine score + single global floor could not separate relevant from off-corpus (gap ~0.04); the cross-encoder separates them by ~2 logits. Then, table-aware fix: the CE's 512-token window only saw a truncated table prefix, so dense spec tables were under-ranked — now the CE is fed the header + the query-relevant rows (`_ce_passage`), and the candidate pool was widened 24→50 so moderate-cosine tables still reach the CE.
+
+**Ground-truth eval (questions derived from real chunks.json content, vs live cloud):**
+| Dimension | Pre-reranker | +reranker | +table-aware |
+|---|---|---|---|
+| Hallucination rejection | 83% | 100% | **100%** |
+| Safety refusal | 90% | 100% | **100%** |
+| Table answerability | 83% | 58% (regressed) | **100%** |
+| Numeric-fact / spec answerability | — | 80% | **90%** |
+| Known-item recall (real content) | — | 67% | **73%** |
+| Procedures | 42% | 60% | 47% (still weak) |
+| Latency p50 | 0.26s | 1.9s | **5.3s** |
+
+**Net:** spec/table retrieval and the safety layer are now solid; the CE gate is authoritative so hallucination/safety stayed at 100% throughout. **Still open, and NOT retrieval-layer fixable:** procedures (needs procedure-aware re-ingestion), Switchgear/Rack coverage (needs documents), latency (deferred by user — the 50-candidate pool is the dial). Status: RAG layer is MVP-grade (exceeds playbook §11 bar); ~7/10 vs absolute enterprise.
 
 ---
 

@@ -118,7 +118,12 @@ def search(
     if query_suffix_parts:
         final_query = f"{query} [{', '.join(query_suffix_parts)}]"
 
-    result = _retrieve(final_query, top_k=top_k, asset_class=asset_class, doc_type=doc_type)
+    result = _retrieve(
+        final_query,
+        top_k=top_k,
+        asset_class=asset_class,
+        doc_type=doc_type,
+    )
     if not result.chunks:
         return []
 

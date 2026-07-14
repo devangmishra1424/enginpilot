@@ -32,7 +32,6 @@ from backend.src.enginpilot.retrieval.retriever import (  # noqa: E402
     retrieve,
     parse_agentic_metadata,
     infer_metadata,
-    boost_scores_lexically,
     _get_qdrant_client,
     _get_embedder,
     COLLECTION_NAME,
@@ -78,7 +77,7 @@ def embed(clean_query: str) -> list:
     return _embed_cache[clean_query]
 
 
-def build_must(asset_class=None, doc_type=None, model_family=None, freq=None, layer=None):
+def build_must(asset_class=None, doc_type=None, model_family=None, freq=None):
     """Replicates retriever.retrieve()'s STAGE-1 hard-wall filter exactly."""
     must = [FieldCondition(key="document_status", match=MatchValue(value="active"))]
     if asset_class:
@@ -87,8 +86,6 @@ def build_must(asset_class=None, doc_type=None, model_family=None, freq=None, la
         must.append(FieldCondition(key="doc_type", match=MatchValue(value=doc_type)))
     if model_family:
         must.append(FieldCondition(key="model_family", match=MatchValue(value=model_family)))
-    if layer:
-        must.append(FieldCondition(key="layer", match=MatchValue(value=layer)))
     if freq:
         try:
             fv = int(freq)
@@ -99,22 +96,24 @@ def build_must(asset_class=None, doc_type=None, model_family=None, freq=None, la
 
 
 def raw_and_boosted(query: str, limit: int = 20):
-    """Mirror retrieve()'s query flow and capture BOTH raw and post-boost scores
-    for the same points, so we can measure whether the lexical boost pushes a
-    sub-floor chunk over CONFIDENCE_FLOOR."""
+    """Mirror retrieve()'s query flow and capture raw cosine + post-nudge score.
+    The lexical boost was removed; the only rank change is the +0.05
+    inferred-model nudge, and an INFERRED model is a rank hint only (not a hard
+    filter — only an EXPLICIT bracketed model_family is a hard wall)."""
     clean, parsed = parse_agentic_metadata(query)
     inferred = infer_metadata(clean)
-    model = parsed.get("model_family") or inferred.get("model_family")
+    explicit_model = parsed.get("model_family")       # hard filter
+    inferred_model = inferred.get("model_family")     # rank nudge only
     freq = parsed.get("frequency_hz") or inferred.get("frequency_hz")
     flt = build_must(asset_class=parsed.get("asset_class"), doc_type=parsed.get("doc_type"),
-                     model_family=model, freq=freq)
+                     model_family=explicit_model, freq=freq)
     resp = _get_qdrant_client().query_points(
         collection_name=COLLECTION_NAME, query=embed(clean), query_filter=flt, limit=limit
     )
     pts = resp.points
     raw = [p.score for p in pts]
-    boost_scores_lexically(clean, pts)  # mutates .score in place
-    boosted = [p.score for p in pts]
+    boosted = [p.score + (0.05 if inferred_model and p.payload.get("model_family") == inferred_model else 0.0)
+               for p in pts]
     return clean, raw, boosted, pts
 
 
@@ -275,29 +274,6 @@ def section_d(bank):
     print(f"[D] doc_type filter    {report['D_doc_type_filter']['grade']:9} "
           f"across {len(queries)} queries; invalid_always_empty={invalid_all_empty}  "
           f"oem_hits={oem_hits} sop_hits={sop_hits}")
-    return rows
-
-
-# ---------------------------------------------------------------------------
-# E. layer filter (exercises fallback-retry path; data has NO layer set)
-# ---------------------------------------------------------------------------
-def section_e(bank):
-    queries = [q for q, _ in bank[:5]]
-    rows = []
-    for q in queries:
-        base = retrieve(q, top_k=5)
-        withlayer = retrieve(q, top_k=5, layer="D8")
-        rows.append({"query": q, "no_layer_returned": len(base.chunks),
-                     "layer_D8_returned": len(withlayer.chunks)})
-    fallback_matches = all(r["layer_D8_returned"] == r["no_layer_returned"] for r in rows)
-    all_return = all(r["layer_D8_returned"] > 0 for r in rows)
-    report["E_layer_filter"] = {
-        "rows": rows, "note": "no point has layer set; a layer filter always triggers the fallback path",
-        "fallback_matches_nolayer": fallback_matches,
-        "grade": grade(all_return, cond_degraded=True)}
-    print(f"[E] layer filter       {report['E_layer_filter']['grade']:9} "
-          f"across {len(queries)} queries; layer is dead metadata -> always falls back "
-          f"(fallback==no_layer: {fallback_matches})")
     return rows
 
 
@@ -531,7 +507,6 @@ def main():
     section_b(QUERY_BANK)
     section_c(QUERY_BANK)
     section_d(QUERY_BANK)
-    section_e(QUERY_BANK)
     section_f()
     section_g()
     section_hi(golden)

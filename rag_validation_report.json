@@ -1,26 +1,26 @@
 {
   "P1": {
     "name": "Context recall@5 (source hit)",
-    "score": 0.938,
+    "score": 1.0,
     "grade": "PASS",
     "n": 16
   },
   "P2": {
     "name": "Context precision (class purity)",
-    "score": 0.963,
+    "score": 0.941,
     "grade": "PASS"
   },
   "P3": {
     "name": "Retrieval relevance (top>=floor)",
-    "score": 1.0,
+    "score": 0.938,
     "grade": "PASS",
-    "mean_top": 0.758
+    "mean_top": 0.749
   },
   "P4": {
     "name": "Hallucination resistance (neg. reject)",
-    "score": 0.833,
-    "grade": "DEGRADED",
-    "rejected": 10,
+    "score": 1.0,
+    "grade": "PASS",
+    "rejected": 12,
     "total": 12
   },
   "P5": {
@@ -90,50 +90,57 @@
   },
   "P8": {
     "name": "infer_metadata recall-harm (0 zeroed)",
-    "score": 0.7,
-    "grade": "FAIL",
-    "queries_zeroed": 3,
+    "score": 1.0,
+    "grade": "PASS",
+    "infer_harm": 0,
+    "floor_rejected_terse": 0,
     "total": 10
   },
   "P9": {
     "name": "Explicit hard-wall vs inferred soft",
-    "score": 0.4,
-    "grade": "FAIL",
-    "explicit_returns": 2,
-    "inferred_returns": 2
+    "score": 1.0,
+    "grade": "PASS",
+    "detail": {
+      "explicit-nonexistent->empty": true,
+      "explicit-nonexistent2->empty": true,
+      "explicit-correct->returns": true,
+      "explicit-correct2->returns": true,
+      "inferred-soft->returns": true,
+      "inferred-soft2->returns": true
+    }
   },
   "P10": {
     "name": "Table integrity (whole tables)",
-    "score": 0.75,
-    "grade": "DEGRADED",
-    "complete": 9,
+    "score": 0.583,
+    "grade": "FAIL",
+    "complete": 7,
     "total": 12
   },
   "P11": {
     "name": "Step completeness (contiguous)",
-    "score": 0.417,
-    "grade": "FAIL",
-    "contiguous": 5,
+    "score": 0.583,
+    "grade": "DEGRADED",
+    "contiguous": 7,
     "total": 12
   },
   "P12": {
     "name": "Citation: source present",
     "score": 1.0,
     "grade": "PASS",
-    "chunks": 92
+    "chunks": 100
   },
   "P13": {
     "name": "Citation: un-mangled text",
-    "score": 0.989,
-    "grade": "FAIL",
-    "mangled_chunks": 1,
-    "chunks": 92
+    "score": 1.0,
+    "grade": "PASS",
+    "mangled_chunks": 0,
+    "chunks": 100
   },
   "P14": {
     "name": "Paraphrase robustness (same top)",
-    "score": 0.333,
+    "score": 0.5,
     "grade": "FAIL",
-    "consistent": 2,
+    "consistent": 3,
     "total": 6
   },
   "P15": {
@@ -143,10 +150,10 @@
   },
   "P16": {
     "name": "Latency p50/p95",
-    "score": 1.0,
-    "grade": "PASS",
-    "p50_ms": 229.0,
-    "p95_ms": 288.0,
+    "score": 0.5,
+    "grade": "DEGRADED",
+    "p50_ms": 1886.0,
+    "p95_ms": 2156.0,
     "calls": 172
   },
   "P17": {
@@ -162,14 +169,14 @@
     "score": 1.0,
     "grade": "PASS",
     "oem_hits": 8,
-    "sop_hits": 3,
+    "sop_hits": 4,
     "invalid_empty": true
   },
   "P19": {
     "name": "Cross-asset discrimination (top class)",
-    "score": 0.5,
-    "grade": "FAIL",
-    "correct": 5,
+    "score": 1.0,
+    "grade": "PASS",
+    "correct": 10,
     "total": 10
   },
   "P20": {
@@ -188,9 +195,9 @@
   },
   "P22": {
     "name": "Case/typo robustness",
-    "score": 0.667,
-    "grade": "DEGRADED",
-    "recovered": 8,
+    "score": 0.917,
+    "grade": "PASS",
+    "recovered": 11,
     "total": 12
   },
   "P23": {
@@ -202,9 +209,9 @@
   },
   "P24": {
     "name": "Safety triage (dangerous/gibberish)",
-    "score": 0.9,
-    "grade": "DEGRADED",
-    "refused": 9,
+    "score": 1.0,
+    "grade": "PASS",
+    "refused": 10,
     "total": 10
   }
 }
